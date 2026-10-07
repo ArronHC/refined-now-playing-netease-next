@@ -4,6 +4,7 @@
 import { parseLyric } from './liblyric/index.ts';
 import { cyrb53 } from './utils.js';
 import { appendRegisterCall, fetchLyricsBySongId, getPlayingSongId } from './ncm-compat.js';
+import './local-lyrics.js';
 
 const preProcessLyrics = (lyrics) => {
 	if (!lyrics) return null;
@@ -272,7 +273,11 @@ const refreshLyricsFromCurrentSong = async (songID = getPlayingSongId(), { force
 	lyricFetchAbortController = abortController;
 
 	try {
-		const rawLyrics = await fetchLyricsBySongId(resolvedSongId, { signal: abortController.signal });
+		const rawLyrics = await window.rnpLocalLyricsBridge.fetchLyrics(
+			resolvedSongId,
+			{ signal: abortController.signal },
+			fetchLyricsBySongId
+		);
 		if (abortController.signal.aborted || !rawLyrics) {
 			return;
 		}
